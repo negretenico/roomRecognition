@@ -24,7 +24,7 @@ i = 0
 with open(dir + "\\rooms.txt", encoding="utf8") as file:
     print(file.name)
     for song in file:
+        print(song)
         if i>= 0:
-            search.do_search(keywords = song,limits=100,download= True)
-            print(song)
+            search.do_search(keywords = song,limits=350,download= True)
         i+=1

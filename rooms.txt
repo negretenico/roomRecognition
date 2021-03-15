@@ -1,6 +1,1 @@
-Kitchen
-Living Room
-BathRoom
-Bed Room
-Dinning Room
-Basements
+DiningRoom

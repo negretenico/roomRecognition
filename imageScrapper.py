@@ -110,8 +110,8 @@ class GoogleImageScraper():
 
 
             except Exception:
-                # print("GoogleImageScraper Error: Failed to be downloaded.")
-                pass
+                print("GoogleImageScraper Error: Failed to be downloaded.")
+
         print("GoogleImageScraper Notification: Download Completed.")
 
     def get_image_size(self, fname):
