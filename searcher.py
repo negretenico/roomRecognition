@@ -22,7 +22,6 @@ search =  Search()
 dir = os.getcwd()
 i = 0
 with open(dir + "\\rooms.txt", encoding="utf8") as file:
-    print(file.name)
     for song in file:
         print(song)
         if i>= 0:

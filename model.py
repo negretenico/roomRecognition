@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow import keras
 from tensorflow.keras import layers
-from tensorflow.python.keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense
+from tensorflow.python.keras.layers import Conv2D, Activation, MaxPooling2D, Flatten, Dense, Dropout, \
+    GlobalAveragePooling2D
 
 from GenerateData  import  DataGenerator
 class CNN:
@@ -27,34 +28,45 @@ class CNN:
     layers.experimental.preprocessing.RandomZoom(0.1),
   ]
 )
-        self.batch_size =32
-        self.model = Sequential([
-            self.data_augmentation,
-            layers.experimental.preprocessing.Rescaling(1. / 255),
-            layers.Conv2D(8, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(16, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(32, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Conv2D(64, 3, padding='same', activation='relu'),
-            layers.MaxPooling2D(),
-            layers.Dropout(0.2),
-            layers.Flatten(),
-            layers.Dense(128, activation='relu'),
-            layers.Dense(len(self.names))
-        ])
+        self.batch_size =64
+        self.model = Sequential([ self.data_augmentation])
+
+        self.model.add(Conv2D(96, (3, 3), activation='relu', padding='same', input_shape=(self.dg.IMG_SIZE, self.dg.IMG_SIZE, 3)))
+        self.model.add(Dropout(0.2))
+
+        self.model.add(Conv2D(96, (3, 3), activation='relu', padding='same'))
+        self.model.add(Conv2D(96, (3, 3), activation='relu', padding='same', strides=2))
+        self.model.add(Dropout(0.5))
+
+        self.model.add(Conv2D(192, (3, 3), activation='relu', padding='same'))
+        self.model.add(Conv2D(192, (3, 3), activation='relu', padding='same'))
+        self.model.add(Conv2D(192, (3, 3), activation='relu', padding='same', strides=2))
+        self.model.add(Dropout(0.5))
+
+        self.model.add(Conv2D(192, (3, 3), padding='same'))
+        self.model.add(Activation('relu'))
+        self.model.add(Conv2D(192, (1, 1), padding='valid'))
+        self.model.add(Activation('relu'))
+        self.model.add(Conv2D(10, (1, 1), padding='valid'))
+
+        self.model.add(GlobalAveragePooling2D())
+
+        self.model.add(Activation('softmax'))
+
+        self.model.summary()
         self.model.compile(optimizer='adam',
                       loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                       metrics=['accuracy'])
     def training(self,epochs):
         history =  self.model.fit(self.images, np.array(self.labels), batch_size=self.batch_size, epochs=epochs, validation_split=0.3)
         return history
-    def evaluateModel(self):
+    def evaluate(self):
         self.model.evaluate(self.images,np.array(self.labels))
 
+
+
     def viewPredictions(self):
-        predictions = self.model.predict(self.images)
+        predictions = self.self.model.predict(self.images)
         plt.figure(figsize=(150, 150))
         classes = np.argmax(predictions, axis=1)
         self.images = self.images.squeeze()
@@ -64,7 +76,10 @@ class CNN:
             plt.xlabel("Actual: " + self.names[self.labels[i]])
             plt.title("Prediction: " + self.names[classes[i]])
             plt.show()
-
+    def save(self, path):
+        self.self.model.save(path)
+    def predict(self,images):
+        return self.model.predict(images)
 
 def plot(epochs,history):
     acc = history.history['accuracy']
@@ -91,10 +106,27 @@ def plot(epochs,history):
 
 
 
+def test(model):
+    pickle_in = open("testingImages.pickle", "rb")
+    images = pickle.load(pickle_in)
+    pickle_in = open("testingLabels.pickle", "rb")
+    labels = pickle.load(pickle_in)
+    names = ['Basements', 'BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'Living Room']
+    predictions = model.predict(images)
+    classes = np.argmax(predictions, axis=1)
+    for i in range(len(classes)):
+        plt.grid(False)
+        plt.imshow(images[i], cmap=plt.cm.binary)
+        plt.xlabel("Actual: " + names[labels[i]])
+        plt.title("Prediction: " + names[classes[i]])
+        plt.show()
 
+# model = tf.keras.models.load_model('saved_model/new_model')
 model = CNN()
-epochs = 50
+epochs = 300
 history = model.training(epochs)
 plot(epochs,history)
+#self.model.viewPredictions()
+model.model.save('saved_model/new_model1')
+test(model)
 
-model.viewPredictions()
