@@ -10,7 +10,6 @@ class Search():
 
     def do_search(self,keywords : str, limits : int, download : bool):
         keywords = keywords.replace("\n","")
-        print(keywords)
         image_scrapper = GoogleImageScraper(self.webdriver_path, self.image_path+"\\"+keywords, keywords, limits, self.headless,
                                             self.min_resolution, self.max_resolution)
         image_urls = image_scrapper.find_image_urls()
@@ -22,8 +21,9 @@ search =  Search()
 dir = os.getcwd()
 i = 0
 with open(dir + "\\rooms.txt", encoding="utf8") as file:
-    for song in file:
-        print(song)
+    for room in file:
+        print(f"Began search for {room}")
         if i>= 0:
-            search.do_search(keywords = song,limits=350,download= True)
+            search.do_search(keywords = room,limits=800,download= True)
         i+=1
+        print(f"\nCompleted search for {room}\n")

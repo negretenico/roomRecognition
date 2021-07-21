@@ -44,13 +44,10 @@ class GoogleImageScraper():
         options = Options()
         if (self.headless):
             options.add_argument('--headless')
-        try:
-            driver = webdriver.Chrome(self.webdriver_path, chrome_options=options)
-            driver.get(self.url)
-            time.sleep(5)
-        except:
-            print(
-                "[-] Please update the chromedriver.exe in the webdriver folder according to your chrome version:https://chromedriver.chromium.org/downloads")
+    
+        driver = webdriver.Chrome(self.webdriver_path, chrome_options=options)
+        driver.get(self.url)
+        time.sleep(1)
 
         for indx in range(1, self.number_of_images + 1):
             try:
@@ -71,11 +68,11 @@ class GoogleImageScraper():
 
                 # scroll page to load next image
                 driver.execute_script("window.scrollTo(0, " + str(indx * 150) + ");")
-                time.sleep(3)
+                time.sleep(.5)
             except Exception as e:
+                print(e)
                 print("GoogleImageScraper Skip: Unable to get the link for this photo")
-
-        #driver.close()
+        driver.quit()
         return image_urls
 
     def save_images(self, image_urls):
@@ -91,25 +88,22 @@ class GoogleImageScraper():
         print("GoogleImageScraper Notification: Saving Image... Please wait.")
         for indx, image_url in enumerate(image_urls):
             try:
-
                 filename = self.search_key + str(indx) + '.jpg'
                 image_path = os.path.join(self.image_path, filename)
-                print("%d .Image saved at: %s" % (indx, image_path))
-                image = requests.get(image_url)
+                image = requests.get(image_url,timeout=10)
                 if image.status_code == 200:
+                    print("Began Writing")
                     with open(image_path, 'wb') as f:
+                        print("%d .Image saved at: %s" % (indx, image_path))
                         f.write(image.content)
-                    image_resolution = self.get_image_size(image_path)
+                        print("Finished Writing")
 
-                    if image_resolution != None:
-                        if image_resolution[0] < self.min_resolution[0] or image_resolution[1] < self.min_resolution[
-                            1] or image_resolution[0] > self.max_resolution[0] or image_resolution[1] > \
-                                self.max_resolution[1]:
-                            # print("GoogleImageScraper Notification: %s did not meet resolution requirements."%(image_url))
-                            os.remove(image_path)
+                else:
+                    print("Passing")
+                    pass
 
-
-            except Exception:
+            except Exception as e:
+                print(e)
                 print("GoogleImageScraper Error: Failed to be downloaded.")
 
         print("GoogleImageScraper Notification: Download Completed.")
