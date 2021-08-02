@@ -50,17 +50,20 @@ if(os.path.isdir(os.path.join(os.getcwd(),path))):
   
 
 else:
-    model = Sequential([data_augmentation,]) 
-    model.add(Conv2D(16, (8, 8), activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(32, (5, 5),  activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Dropout(0.2))
-    model.add(Flatten())
-    model.add(Dense(300, activation='relu', bias_regularizer=tf.keras.regularizers.L1L2(l1=0.01, l2=0.001)))
-    model.add(Dropout(0.2))
-    model.add(Dense(100, activation='relu', bias_regularizer=tf.keras.regularizers.L1L2(l1=0.01, l2=0.001)))
-    model.add(Dense(len(class_names)))
+    model = Sequential([
+      data_augmentation,
+      Rescaling(1./255),
+      Conv2D(16, 3, padding='same', activation='relu'),
+      MaxPooling2D(),
+      Conv2D(32, 3, padding='same', activation='relu'),
+      MaxPooling2D(),
+      Conv2D(64, 3, padding='same', activation='relu'),
+      MaxPooling2D(),
+      Dropout(0.2),
+      Flatten(),
+      Dense(128, activation='relu'),
+      Dense(len(class_names))
+    ])
     model.compile(optimizer='adam',
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])   
