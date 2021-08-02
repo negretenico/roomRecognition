@@ -50,7 +50,7 @@ class Data:
 
 
 DIR  = os.getcwd() +"\\Images"
-categories =  ['Basements', 'BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'LivingRoom']
+categories =  [ 'BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'LivingRoom']
 
 
 #convertes from jpg to JPEG

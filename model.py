@@ -39,19 +39,21 @@ batch_size =1
 path = 'saved_model/my_model'
 
 
-categories =  ['Basements', 'BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'LivingRoom']
+categories =  ['BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'LivingRoom']
 DIR= os.getcwd()+"\\Testing"
 
-if(not os.path.isdir(path)):
-    model = Sequential([
-      data_augmentation,
-    ]) 
-    model.add(Rescaling(1./255))
+if(os.path.isdir(os.path.join(os.getcwd(),path))):
+    model = tf.keras.models.load_model(path)
+    print('else')
+    # Check its architecture
+    model.summary()  
+  
+
+else:
+    model = Sequential([data_augmentation,]) 
     model.add(Conv2D(16, (8, 8), activation='relu'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Conv2D(32, (5, 5),  activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(64, (2, 2), activation='relu'))
     model.add(MaxPooling2D((2, 2)))
     model.add(Dropout(0.2))
     model.add(Flatten())
@@ -63,26 +65,27 @@ if(not os.path.isdir(path)):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])   
     model.summary()
+    with tf.device('/GPU:0'):
+        epochs = 1000
+        history = model.fit( train_ds,  validation_data=val_ds,  epochs=epochs)
+        model.save('saved_model/my_model')
 
-    model.save('saved_model/my_model')
 
-else:
-  model = tf.keras.models.load_model(path)
 
-  # Check its architecture
-  model.summary()  
-
-with tf.device('/GPU:0'):
-    epochs = 1000
-    history = model.fit( train_ds,  validation_data=val_ds,  epochs=epochs)
-
+total = 0
+num_correct = 0
 for cat in categories:
     for file in os.listdir(os.path.join(DIR,cat)):
+        total +=1
         img = tf.keras.preprocessing.image.load_img(os.path.join(os.path.join(DIR,cat),file), target_size=(IMG_HEIGHT, IMG_WIDTH))
         img_array = tf.keras.preprocessing.image.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0) # Create a batch
 
         predictions = model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
-        print(f"This image most likely belongs to {class_names[np.argmax(score)]} with a { 100 * np.max(score)} percent confidence.")
-        print(f"The true label is {cat}")
+        print(f"This image most likely belongs to {class_names[np.argmax(score)]} with a { 100 * np.max(score)} percent confidence.\n")
+        print(f"The true label is {cat}\n")
+        if cat == class_names[np.argmax(score)]:
+          num_correct +=1
+
+print(f"Total Correct:{num_correct}\nTotal Tests:{total}\nAccuracy: {num_correct/total}")
