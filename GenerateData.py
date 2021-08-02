@@ -10,9 +10,13 @@ from PIL import Image
 
 
 class Data:
+    def normalize_img(self,image, label):
+          """Normalizes images: `uint8` -> `float32`."""
+          return tf.cast(image, tf.float32) / 255., label
     def __init__(self):
         data_dir = os.getcwd() +"\\Images"
         test_dir = os.getcwd()+"\\Testing"
+
         self.img_height,self.img_width = 180,180
         batch_size = 32
         self.train_ds = tf.keras.preprocessing.image_dataset_from_directory(
@@ -32,6 +36,10 @@ class Data:
             batch_size=batch_size)
         
         AUTOTUNE = tf.data.AUTOTUNE
+
+        self.train_ds = self.train_ds.map(self.normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+        self.val_ds = self.val_ds.map(self.normalize_img, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+
         self.train_ds = self.train_ds.shuffle(1000).cache().prefetch(buffer_size=AUTOTUNE)
         self.val_ds = self.val_ds.cache().prefetch(buffer_size=AUTOTUNE)
         
@@ -46,10 +54,10 @@ categories =  ['Basements', 'BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'Liv
 
 
 #convertes from jpg to JPEG
-def convert_to_JPEG():
+def convert_to_JPEG(dir):
     for cat in categories:
         #path for the folder
-        path = os.path.join(DIR,cat)
+        path = os.path.join(dir,cat)
         print(path)
         count = 0
         for filename in os.listdir(path):
@@ -76,7 +84,7 @@ def Normalize(data, mean_data =None, std_data =None):
     return norm_data, mean_data, std_data
 
 
-convert_to_JPEG()
+convert_to_JPEG(DIR)
 #removes all files that end with jpg 
 for cat in categories:
     for file in os.listdir(os.path.join(DIR,cat)):
