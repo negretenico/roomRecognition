@@ -56,7 +56,7 @@ class GoogleImageScraper():
                 imgurl.click()
 
                 # select image from the popup
-                time.sleep(.5)
+                time.sleep(.75)
                 images = driver.find_elements_by_class_name("n3VNCb")
                 for image in images:
 
