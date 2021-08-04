@@ -1,1 +1,4 @@
-unfinished basement
+Kitchen
+BedRoom
+LivingRoom
+BathRoom
