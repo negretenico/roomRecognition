@@ -44,33 +44,21 @@ class Data:
         self.val_ds = self.val_ds.cache().prefetch(buffer_size=AUTOTUNE)
     
 
-DIR  = os.getcwd() +"\\Images"
-categories =  [ 'BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'LivingRoom']
-
-
 #convertes from jpg to JPEG
-def convert_to_JPEG(dir):
-    for cat in categories:
-        #path for the folder
-        path = os.path.join(dir,cat)
-        print(path)
-        count = 0
-        for filename in os.listdir(path):
-            if filename.endswith(".png") or filename.endswith(".jpg"):
-                try:
-                    im = Image.open(os.path.join(path,filename))
-                    name = filename[:-4]+".JPEG"
-                    rgb_im = im.convert('RGB')
-                    rgb_im.save(os.path.join(path,name))
-                    count +=1
-                except:
-                    print("Error occured")
-        print(f"{count} converted from png/jpg to JPEG in {cat}")
-
-
-convert_to_JPEG(DIR)
-#removes all files that end with jpg 
-for cat in categories:
-    for file in os.listdir(os.path.join(DIR,cat)):
-         if file.endswith('.png') or file.endswith(".jpg"):
-            os.remove(os.path.join(os.path.join(DIR,cat),file))
+# def convert_to_JPEG(dir):
+#     for cat in categories:
+#         #path for the folder
+#         path = os.path.join(dir,cat)
+#         print(path)
+#         count = 0
+#         for filename in os.listdir(path):
+#             if filename.endswith(".jpg"):
+#                 try:
+#                     im = Image.open(os.path.join(path,filename))
+#                     name = filename[:-4]+".JPEG"
+#                     rgb_im = im.convert('RGB')
+#                     rgb_im.save(os.path.join(path,name))
+#                     count +=1
+#                 except:
+#                     print("Error occured")
+#         print(f"{count} converted from png/jpg to JPEG in {cat}")

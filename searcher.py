@@ -24,6 +24,6 @@ with open(dir + "\\rooms.txt", encoding="utf8") as file:
     for room in file:
         print(f"Began search for {room}")
         if i>= 0:
-            search.do_search(keywords = room,limits=800,download= True)
+            search.do_search(keywords = room,limits=500,download= True)
         i+=1
         print(f"\nCompleted search for {room}\n")
