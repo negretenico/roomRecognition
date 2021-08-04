@@ -56,7 +56,7 @@ class GoogleImageScraper():
                 imgurl.click()
 
                 # select image from the popup
-                time.sleep(3)
+                time.sleep(.5)
                 images = driver.find_elements_by_class_name("n3VNCb")
                 for image in images:
 
@@ -70,7 +70,6 @@ class GoogleImageScraper():
                 driver.execute_script("window.scrollTo(0, " + str(indx * 150) + ");")
                 time.sleep(.5)
             except Exception as e:
-                print(e)
                 print("GoogleImageScraper Skip: Unable to get the link for this photo")
         driver.quit()
         return image_urls
@@ -88,7 +87,7 @@ class GoogleImageScraper():
         print("GoogleImageScraper Notification: Saving Image... Please wait.")
         for indx, image_url in enumerate(image_urls):
             try:
-                filename = self.search_key + str(indx) + '.jpg'
+                filename = str(indx) + '.jpeg'
                 image_path = os.path.join(self.image_path, filename)
                 image = requests.get(image_url,timeout=10)
                 if image.status_code == 200:
@@ -102,8 +101,7 @@ class GoogleImageScraper():
                     print("Passing")
                     pass
 
-            except Exception as e:
-                print(e)
+            except Exception:
                 print("GoogleImageScraper Error: Failed to be downloaded.")
 
         print("GoogleImageScraper Notification: Download Completed.")
