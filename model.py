@@ -1,7 +1,6 @@
 from tensorflow import keras
 from tensorflow.python.keras.layers.normalization import BatchNormalization
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
-from GenerateData import Data
 import tensorflow as tf
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -20,6 +19,11 @@ warnings.filterwarnings('ignore')
 
 
 train_datagen = ImageDataGenerator(
+      featurewise_center=True,
+    featurewise_std_normalization=True,
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
         rescale=1./255,
         shear_range=0.2,
         zoom_range=0.2,
@@ -28,12 +32,12 @@ test_datagen = ImageDataGenerator(rescale=1./255)
 train_generator = train_datagen.flow_from_directory(
         'data/train',
         target_size=(150, 150),
-        batch_size=32,
+        batch_size=16,
         class_mode='categorical')
 validation_generator = test_datagen.flow_from_directory(
         'data/validation',
         target_size=(150, 150),
-        batch_size=32,
+        batch_size=16,
         class_mode='categorical')
 
 
@@ -49,7 +53,8 @@ path = 'saved_model/my_model'
 
 
 categories =  ["BathRoom","BedRoom","Kitchen","LivingRoom"]
-DIR= os.getcwd()+"\\Testing"
+DIR= os.path.join(os.getcwd(),os.path.join("data","test"))
+print(DIR)
 
 if(os.path.isdir(os.path.join(os.getcwd(),path))):
     model = tf.keras.models.load_model(path)
@@ -82,7 +87,7 @@ else:
     model.summary()
 
     model.compile(loss='categorical_crossentropy',
-              optimizer=RMSprop(lr=0.001),
+              optimizer="adam",
               metrics=['acc'])
     with tf.device('/GPU:0'):
         epochs = 50
@@ -108,7 +113,7 @@ for cat in categories:
         img_array = tf.expand_dims(img_array, 0) # Create a batch
         predictions = model.predict(img_array)
         score = tf.nn.softmax(predictions[0])
-        print(f"This image most likely belongs to {class_names[np.argmax(score)]} with a { 100 * np.max(score)} percent confidence.\n")
+        print(f"This image {class_names[np.argmax(score)]}.\n")
         print(f"The true label is {cat}\n")
         if cat == class_names[np.argmax(score)]:
           num_correct +=1

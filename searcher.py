@@ -1,27 +1,12 @@
-from imageScrapper import GoogleImageScraper
+from imageScapper import GoogleImageScraper
 import os
-class Search():
-    def __init__(self):
-        self.webdriver_path = os.getcwd() + "\\webdriver\\chromedriver.exe"
-        self.image_path = os.getcwd() + "\\Images"
-        self.min_resolution = (0, 0)
-        self.max_resolution = (1920, 1080)
-        self.headless = False
-
-    def do_search(self,keywords : str, limits : int, download : bool):
-        keywords = keywords.replace("\n","")
-        image_scrapper = GoogleImageScraper(self.webdriver_path, self.image_path+"\\"+keywords, keywords, limits, self.headless,
-                                            self.min_resolution, self.max_resolution)
-        image_urls = image_scrapper.find_image_urls()
-        if download:
-            image_scrapper.save_images(image_urls)
-        return image_urls
-
-search =  Search()
 dir = os.getcwd()
 i = 0
+webdriver_path = os.path.join(os.path.join(os.getcwd(),"webdriver"),"chromedriver.exe")
+image_scapper = GoogleImageScraper(webdriver_path=webdriver_path)
+LIMIT = 1000
 with open(dir + "\\rooms.txt", encoding="utf8") as file:
     for room in file:
-        if i>= 0:
-            search.do_search(keywords = room,limits=500,download= True)
-        i+=1
+        room = room.replace("\n","")
+        image_path = os.path.join(os.path.join(os.path.join(os.getcwd(),"data"),"train"),room)
+        image_scapper.find_and_save(search_key=room,limit = LIMIT,image_path=image_path)
