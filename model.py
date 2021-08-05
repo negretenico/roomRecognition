@@ -1,4 +1,5 @@
 from tensorflow import keras
+from tensorflow.python.keras.layers.normalization import BatchNormalization
 from tensorflow.python.keras.layers.pooling import GlobalAveragePooling2D
 from GenerateData import Data
 import tensorflow as tf
@@ -28,34 +29,21 @@ train_generator = train_datagen.flow_from_directory(
         'data/train',
         target_size=(150, 150),
         batch_size=32,
-        class_mode='binary')
+        class_mode='categorical')
 validation_generator = test_datagen.flow_from_directory(
         'data/validation',
         target_size=(150, 150),
         batch_size=32,
-        class_mode='binary')
+        class_mode='categorical')
 
 
-data = Data()
-IMG_HEIGHT = data.img_height
-IMG_WIDTH = data.img_width
-train_ds = data.train_ds
-val_ds = data.val_ds
+# data = Data()
+# IMG_HEIGHT = data.img_height
+# IMG_WIDTH = data.img_width
+# train_ds = data.train_ds
+# val_ds = data.val_ds
 learning_rate = 1.00e-3
 
-class_names = data.class_names
-data_augmentation = Sequential(
-  [
-    RandomFlip("horizontal_and_vertical",  input_shape=(  IMG_HEIGHT,
-                                                                IMG_WIDTH,1)),
-Rescaling(scale=1.0 / 255),
-
-RandomZoom(
-height_factor=(-0.05, -0.15),
-width_factor=(-0.05, -0.15)),
-RandomRotation(0.3)]
-  
-)
 batch_size =1
 path = 'saved_model/my_model'
 
@@ -72,45 +60,50 @@ if(os.path.isdir(os.path.join(os.getcwd(),path))):
 
 else:
     model = Sequential([
-      data_augmentation,
-      Conv2D(64, (3,3), padding='same', activation='relu'),
-      MaxPooling2D(pool_size= (2,2)),
+
+    Conv2D(128, (3,3), activation='relu', input_shape=(150,150, 3)),
+    MaxPooling2D(2, 2),
+    Conv2D(128, (3,3), activation='relu'),
+    keras.layers.MaxPooling2D(2,2),
+    Conv2D(64, (3,3), activation='relu'),
+    MaxPooling2D(2,2),
+    Conv2D(32, (3,3), activation='relu'),
+    MaxPooling2D(2,2),
+    BatchNormalization(momentum=0.9),
+    Conv2D(16, (3,3), activation='relu'),
+    MaxPooling2D(2,2),
+    Flatten(),
+
+    Dense(512, activation='relu'),
     Dropout(0.2),
-
-      Conv2D(32, 3, padding='same', activation='relu'),
-      MaxPooling2D(pool_size= (2,2)),
-      Dropout(0.2),
-
-      Conv2D(64, 3, padding='same', activation='relu'),
-      MaxPooling2D(pool_size= (2,2)),
-      Dropout(0.2),
-      
-      Flatten(),
-      Dense(128, activation='softmax'),
-      Dense(len(class_names))
+ 
+    Dense(4, activation='softmax')
     ])
-    model.compile(optimizer=RMSprop(learning_rate=0.001),
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                  metrics=['accuracy'])   
     model.summary()
+
+    model.compile(loss='categorical_crossentropy',
+              optimizer=RMSprop(lr=0.001),
+              metrics=['acc'])
     with tf.device('/GPU:0'):
         epochs = 50
-        history = model.fit(
-        train_generator,
-        steps_per_epoch=2000,
-        epochs=50,
-        validation_data=validation_generator,
-        validation_steps=800)
+        history = model.fit_generator(
+      train_generator,  
+      epochs=epochs,
+      verbose=1,
+      validation_data = validation_generator,
+      validation_steps=8)
         model.save('saved_model/my_model')
 
 
 
 total = 0
 num_correct = 0
+class_names = ["BathRoom","BedRoom","Kitchen","LivingRoom"]
+
 for cat in categories:
     for file in os.listdir(os.path.join(DIR,cat)):
         total +=1
-        img = tf.keras.preprocessing.image.load_img(os.path.join(os.path.join(DIR,cat),file), color_mode="grayscale",target_size=(IMG_HEIGHT, IMG_WIDTH))
+        img = tf.keras.preprocessing.image.load_img(os.path.join(os.path.join(DIR,cat),file), target_size=(150, 150))
         img_array = tf.keras.preprocessing.image.img_to_array(img)
         img_array = tf.expand_dims(img_array, 0) # Create a batch
         predictions = model.predict(img_array)
