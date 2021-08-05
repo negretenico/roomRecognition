@@ -15,12 +15,12 @@ ottom portion reorders the directories
 #             print("Error Occured")
 #             print(e)
 
-# path = os.path.join(os.getcwd(),"data")
-# for state in train_val:
-#     for cat in categories:
-#         print(f"{state, cat} has {len(os.listdir(os.path.join(os.path.join(path,state),cat)))} items")
-#         for i,file in enumerate(os.listdir(os.path.join(os.path.join(path,state),cat))):
-#             os.remove(os.path.join(os.path.join(os.path.join(path,state),cat),file))
+path = os.path.join(os.getcwd(),"data")
+for state in train_val:
+    for cat in categories:
+        print(f"{state, cat} has {len(os.listdir(os.path.join(os.path.join(path,state),cat)))} items")
+        # for i,file in enumerate(os.listdir(os.path.join(os.path.join(path,state),cat))):
+        #     os.remove(os.path.join(os.path.join(os.path.join(path,state),cat),file))
 
 
 

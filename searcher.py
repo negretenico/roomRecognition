@@ -1,7 +1,6 @@
 from imageScapper import GoogleImageScraper
 import os
 dir = os.getcwd()
-i = 0
 webdriver_path = os.path.join(os.path.join(os.getcwd(),"webdriver"),"chromedriver.exe")
 image_scapper = GoogleImageScraper(webdriver_path=webdriver_path)
 LIMIT = 1000

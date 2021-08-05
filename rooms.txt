@@ -1,4 +1,1 @@
-Kitchen
-BedRoom
 LivingRoom
-BathRoom

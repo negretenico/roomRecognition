@@ -18,37 +18,31 @@ import os
 warnings.filterwarnings('ignore')
 
 
-train_datagen = ImageDataGenerator(
-      featurewise_center=True,
-    featurewise_std_normalization=True,
-    rotation_range=20,
-    width_shift_range=0.2,
-    height_shift_range=0.2,
-        rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
-test_datagen = ImageDataGenerator(rescale=1./255)
-train_generator = train_datagen.flow_from_directory(
-        'data/train',
-        target_size=(150, 150),
-        batch_size=16,
-        class_mode='categorical')
-validation_generator = test_datagen.flow_from_directory(
-        'data/validation',
-        target_size=(150, 150),
-        batch_size=16,
-        class_mode='categorical')
+batch_size =32
+img_height,img_width= (180,180)
+data_dir = os.path.join(os.path.join(os.getcwd(),"data"),"train")
+
+train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2,
+  subset="training",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+  data_dir,
+  validation_split=0.2,
+  subset="validation",
+  seed=123,
+  image_size=(img_height, img_width),
+  batch_size=batch_size)
+AUTOTUNE = tf.data.AUTOTUNE
+
+train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 
-# data = Data()
-# IMG_HEIGHT = data.img_height
-# IMG_WIDTH = data.img_width
-# train_ds = data.train_ds
-# val_ds = data.val_ds
-learning_rate = 1.00e-3
-
-batch_size =1
 path = 'saved_model/my_model'
 
 
@@ -90,14 +84,12 @@ else:
               optimizer="adam",
               metrics=['acc'])
     with tf.device('/GPU:0'):
-        epochs = 50
-        history = model.fit_generator(
-      train_generator,  
-      epochs=epochs,
-      verbose=1,
-      validation_data = validation_generator,
-      validation_steps=8)
-        model.save('saved_model/my_model')
+        epochs=10
+        history = model.fit(
+          train_ds,
+          validation_data=val_ds,
+          epochs=epochs
+        )
 
 
 

@@ -50,13 +50,9 @@ class GoogleImageScraper():
         print(f"Began saving images for {search_key}")
         for i in range(1, limit+1):
             try:
-                image_path = image_path+"\\"+str(i)+'.JPEG'
-                original_size = driver.get_window_size()
-                height = driver.execute_script("return document.body.parentNode.scrollHeight")
-                driver.set_window_size(original_size['width'], height)
-                driver.find_element_by_xpath('//*[@id="islrg"]/div[1]/div['+str(i-1)+']/a[1]/div[1]/img').screenshot(image_path)
-                time.sleep(1)
-            except:
+                save_path = image_path+"\\"+str(i-1)+'.JPEG'
+                driver.find_element_by_xpath('//*[@id="islrg"]/div[1]/div['+str(i-1)+']/a[1]/div[1]/img').screenshot(save_path)
+            except Exception as e:
                 pass
         
         print("Completed.")
