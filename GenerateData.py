@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras import layers
 from PIL import Image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+
 
 
 class Data:
@@ -23,7 +26,7 @@ class Data:
         self.train_ds = tf.keras.preprocessing.image_dataset_from_directory(
                 data_dir,
                 color_mode = "grayscale",
-                validation_split=0.2,
+                validation_split=0.1,
                 subset="training",
                 seed=123,
                 image_size=(self.img_height, self.img_width),
@@ -32,7 +35,7 @@ class Data:
         self.val_ds = tf.keras.preprocessing.image_dataset_from_directory(
             data_dir,
             color_mode = "grayscale",
-            validation_split=0.2,
+            validation_split=0.1,
             subset="validation",
             seed=123,
             image_size=(self.img_height, self.img_width),
@@ -45,20 +48,29 @@ class Data:
     
 
 #convertes from jpg to JPEG
-# def convert_to_JPEG(dir):
-#     for cat in categories:
-#         #path for the folder
-#         path = os.path.join(dir,cat)
-#         print(path)
-#         count = 0
-#         for filename in os.listdir(path):
-#             if filename.endswith(".jpg"):
-#                 try:
-#                     im = Image.open(os.path.join(path,filename))
-#                     name = filename[:-4]+".JPEG"
-#                     rgb_im = im.convert('RGB')
-#                     rgb_im.save(os.path.join(path,name))
-#                     count +=1
-#                 except:
-#                     print("Error occured")
-#         print(f"{count} converted from png/jpg to JPEG in {cat}")
+def convert_to_JPEG(dir):
+    categories = ["BathRoom","BedRoom","Kitchen","LivingRoom"]
+    for cat in categories:
+        #path for the folder
+        path = os.path.join(dir,cat)
+        print(path)
+        count = 0
+        for filename in os.listdir(path):
+            if filename.endswith(".jpg") or filename.endswith(".png"):
+                try:
+                    im = Image.open(os.path.join(path,filename))
+                    name = filename[:-4]+".JPEG"
+                    rgb_im = im.convert('RGB')
+                    rgb_im.save(os.path.join(path,name))
+                    count +=1
+                except:
+                    print("Error occured")
+            elif filename.endswith(".jpeg"):
+                    im = Image.open(os.path.join(path,filename))
+                    name = filename[:-5]+".JPEG"
+                    rgb_im = im.convert('RGB')
+                    rgb_im.save(os.path.join(path,name))
+                    count +=1  
+        print(f"{count} converted from png/jpg to JPEG in {cat}")
+
+directories = ["Images","Testing"]

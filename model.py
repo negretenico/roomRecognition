@@ -6,9 +6,9 @@ from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
-from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Activation
 from tensorflow.keras.layers.experimental.preprocessing import Rescaling, RandomFlip,RandomZoom,RandomRotation
-from tensorflow.keras.optimizers import Adam, SGD
+from tensorflow.keras.optimizers import RMSprop
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 import numpy as np
@@ -16,6 +16,25 @@ import matplotlib.pyplot as plt
 import warnings
 import os
 warnings.filterwarnings('ignore')
+
+
+train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
+test_datagen = ImageDataGenerator(rescale=1./255)
+train_generator = train_datagen.flow_from_directory(
+        'data/train',
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary')
+validation_generator = test_datagen.flow_from_directory(
+        'data/validation',
+        target_size=(150, 150),
+        batch_size=32,
+        class_mode='binary')
+
 
 data = Data()
 IMG_HEIGHT = data.img_height
@@ -41,7 +60,7 @@ batch_size =1
 path = 'saved_model/my_model'
 
 
-categories =  ['BathRoom', 'BedRoom', 'DiningRoom', 'Kitchen', 'LivingRoom']
+categories =  ["BathRoom","BedRoom","Kitchen","LivingRoom"]
 DIR= os.getcwd()+"\\Testing"
 
 if(os.path.isdir(os.path.join(os.getcwd(),path))):
@@ -54,29 +73,34 @@ if(os.path.isdir(os.path.join(os.getcwd(),path))):
 else:
     model = Sequential([
       data_augmentation,
-      Conv2D(16, 3, padding='same', activation='relu'),
-      Conv2D(16, 3, padding='same', activation='relu'),
-      MaxPooling2D(),
-      Dropout(0.2),
+      Conv2D(64, (3,3), padding='same', activation='relu'),
+      MaxPooling2D(pool_size= (2,2)),
+    Dropout(0.2),
 
       Conv2D(32, 3, padding='same', activation='relu'),
-      MaxPooling2D(),
+      MaxPooling2D(pool_size= (2,2)),
       Dropout(0.2),
 
       Conv2D(64, 3, padding='same', activation='relu'),
-      MaxPooling2D(),
+      MaxPooling2D(pool_size= (2,2)),
       Dropout(0.2),
+      
       Flatten(),
-      Dense(128, activation='relu'),
+      Dense(128, activation='softmax'),
       Dense(len(class_names))
     ])
-    model.compile(optimizer='adam',
+    model.compile(optimizer=RMSprop(learning_rate=0.001),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])   
     model.summary()
     with tf.device('/GPU:0'):
-        epochs = 200
-        history = model.fit( train_ds,  validation_data=val_ds,  epochs=epochs)
+        epochs = 50
+        history = model.fit(
+        train_generator,
+        steps_per_epoch=2000,
+        epochs=50,
+        validation_data=validation_generator,
+        validation_steps=800)
         model.save('saved_model/my_model')
 
 
